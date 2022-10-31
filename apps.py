@@ -65,7 +65,7 @@ def test_data_predict(lstm_model):
 
   return prediction_prices
 
-stock_lstm = load_model("fang_stock_prediction.h5")
+stock_lstm = load_model("https://github.com/bills1912/stock-predicition/blob/main/fang_stock_prediction.h5")
 
 predict_prices = test_data_predict(lstm_model=stock_lstm)
 valid = test_data_GOOG.filter(['Adj Close'])
