@@ -5,13 +5,12 @@ import datetime as dt
 import streamlit as st
 import tensorflow as tf
 import pandas_datareader as pdr
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
 
-warnings.filterwarnings('ignore')
-plt.style.use('fivethirtyeight')
+# warnings.filterwarnings('ignore')
+# plt.style.use('fivethirtyeight')
 
 st.set_page_config(
         page_title="FANG Stock Prediction",
