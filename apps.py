@@ -5,6 +5,7 @@ import datetime as dt
 import streamlit as st
 import tensorflow as tf
 import pandas_datareader as pdr
+from tensorflow.keras import load_model
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, LSTM
@@ -35,42 +36,6 @@ scaled_data_FB = scaler.fit_transform(data_FB.filter(['Adj Close']).values.resha
 scaled_data_GOOG = scaler.fit_transform(data_GOOG.filter(['Adj Close']).values.reshape(-1, 1))
 prediction_days = 89
 
-def prepare_dataset():
-  x_train = []
-  y_train = []
-
-  for x in range(prediction_days, len(scaled_data_GOOG)):
-    x_train.append(scaled_data_GOOG[x-prediction_days:x, 0])
-    y_train.append(scaled_data_GOOG[x, 0])
-  
-  x_train, y_train = np.array(x_train), np.array(y_train)
-  x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-
-  return x_train, y_train
-
-X_train, y_train = prepare_dataset()
-
-def LSTM_model(x_train):
-  model = Sequential([
-                      LSTM(units=60, return_sequences=True, input_shape=(x_train.shape[1], 1)),
-                      Dropout(0.2),
-                      LSTM(units=60, return_sequences=True),
-                      Dropout(0.2),
-                      LSTM(units=60),
-                      Dropout(0.2),
-
-                      Dense(units=1)
-  ])
-
-  model.compile(optimizer='adam',
-                loss='mean_squared_error',
-                metrics=['mean_squared_error'])
-  
-  return model
-
-stock_lstm = LSTM_model(X_train)
-stock_lstm.fit(X_train, y_train, epochs=25, batch_size=32)
-
 test_start = dt.datetime(2020, 12, 31)
 test_end = dt.datetime.now()
 test_data_FB = pdr.DataReader(company_ticker[0], 'yahoo', test_start, test_end)
@@ -86,7 +51,6 @@ model_inputs = total_dataset[len(total_dataset) - len(test_data_GOOG) - predicti
 model_inputs = model_inputs.reshape(-1, 1)
 model_inputs = scaler.fit_transform(model_inputs)
 
-
 def test_data_predict(lstm_model):
   X_test = []
 
@@ -100,6 +64,8 @@ def test_data_predict(lstm_model):
   prediction_prices = scaler.inverse_transform(prediction_prices)
 
   return prediction_prices
+
+stock_lstm = load_model("fang_stock_prediction.h5")
 
 predict_prices = test_data_predict(lstm_model=stock_lstm)
 valid = test_data_GOOG.filter(['Adj Close'])
